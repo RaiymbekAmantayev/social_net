@@ -1,5 +1,4 @@
 const dbConfig = require('../config/dbConfig.js');
-
 const {Sequelize, DataTypes} = require('sequelize');
 
 const sequelize = new Sequelize(
@@ -36,6 +35,8 @@ db.sequelize = sequelize
 db.posts = require('../models/Posts')(sequelize, DataTypes);
 db.comments = require('../models/Comments')(sequelize, DataTypes);
 db.users = require('../models/Users')(sequelize, DataTypes);
+db.likes = require('../models/Likes')(sequelize, DataTypes);
+
 
 db.sequelize.sync({ force: false })
     .then(() => {
@@ -54,13 +55,13 @@ db.comments.belongsTo(db.posts, {
     as: 'post'
 })
 
-// db.users.hasMany(db.posts, {
-//     foreignKey: 'UserId',
-//     as: 'users'
-// })
-//
-// db.posts.belongsTo(db.users, {
-//     foreignKey: 'UserId',
-//     as: 'post'
-// })
+db.posts.hasMany(db.likes, {
+    foreignKey: 'PostId',
+    as: "likes"
+});
+db.likes.belongsTo(db.posts, {
+    foreignKey: 'PostId',
+    as: 'post'
+})
+
 module.exports = db

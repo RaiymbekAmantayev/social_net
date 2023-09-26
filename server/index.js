@@ -9,7 +9,7 @@ const app = express()
 app.use(express.json())
 app.use(cors());
 app.use(express.urlencoded({ extended: true }))
-
+app.use('/Images', express.static('./Images'))
 
 // routers
 const router = require('./routers/PostRouters')
@@ -17,7 +17,7 @@ app.use('/api/posts', router)
 
 //static Images Folder
 
-// app.use('/Images', express.static('./Images'))
+
 
 
 //port

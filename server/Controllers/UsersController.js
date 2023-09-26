@@ -3,6 +3,21 @@ const Posts = db.posts
 const Comment = db.comments
 const Users = db.users
 const bcrypt = require('bcrypt')
+const {sign} = require('jsonwebtoken')
+
+const GetUser = async (req, res) => {
+    if(req.user) {
+        try {
+            const user = await Users.findAll({where: {username: req.user.username}})
+            res.json(user)
+        } catch (err) {
+            console.error(err)
+        }
+    }
+    else{
+        res.json("user not found")
+    }
+};
 
 const Auth = async (req, res)=>{
 const  {username, password} = req.body;
@@ -24,13 +39,16 @@ const Login = async (req, res) => {
             return res.json({ error: "User doesn't exist" });
         }
 
-        bcrypt.compare(password, user.password)
-            .then((match) => {
+        bcrypt.compare(password, user.password).then((match) => {
                 if (!match) {
                     return res.json({ error: "Wrong username and password combination" });
                 }
-                return res.json("You logged in");
+                const accessToken =sign({username:user.username, id:user.id},
+                    "importantsecret")
+                return res.json(accessToken);
             })
+
+
             .catch((error) => {
                 console.error(error);
                 return res.json({ error: "Error comparing passwords" });
@@ -42,7 +60,10 @@ const Login = async (req, res) => {
 }
 
 
+
+
 module.exports={
     Auth,
-    Login
+    Login,
+    GetUser
 }
