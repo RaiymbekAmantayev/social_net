@@ -16,7 +16,7 @@ router.get('/all', postController.getAllPosts)
 router.get('/:id', postController.getById)
 
 // updating
-router.put('/update/:id', passport.authenticate('jwt', {session: false}), postController.update)
+router.put('/update/:id', passport.authenticate('jwt', {session: false}), postController.upload, postController.update)
 
 // deleting
 router.delete('/:id', passport.authenticate('jwt', {session: false}), postController.Destroy)
@@ -50,5 +50,11 @@ router.get('/users/comments',passport.authenticate('jwt', {session: false}), com
 
 // все посты который юзер лайкнул
 router.get('/users/likes',passport.authenticate('jwt', {session: false}), postController.UserLikedPosts)
+
+// вся инфа о юзере + посты который он выложил
+router.get('/users/info/:id', userController.UserInfo)
+
+//
+router.put('/users/edit', passport.authenticate('jwt', {session: false}), userController.ChangePassword)
 
 module.exports=router

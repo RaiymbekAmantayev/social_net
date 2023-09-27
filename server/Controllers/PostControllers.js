@@ -63,19 +63,29 @@ const update = async (req, res) => {
     const id = req.params.id;
     const user = req.user.username;
     let newPost = {
+        image: req.file.path,
         title: req.body.title,
         postText: req.body.postText,
         username: user
     }
     try {
-        const [updatedRows] = await Posts.update(newPost, {
-            where: { id: id }
-        });
-        if (updatedRows === 1) {
-            res.status(200).send({ message: "Пост успешно обновлен" });
-        } else {
-            res.status(404).send({ message: "Пост не найден" });
+        const post = await Posts.findByPk(id)
+
+        if(post && user == post.username){
+
+            const [updatedRows] = await Posts.update(newPost, {
+                where: { id: id }
+            });
+            if (updatedRows === 1) {
+                res.status(200).send({ message: "Пост успешно обновлен" });
+            } else {
+                res.status(404).send({ message: "Пост не найден" });
+            }
         }
+        else {
+            res.status(403).json("You don't have access to delete or the post doesn't exist");
+        }
+
     } catch (error) {
         res.status(500).send({ message: "Произошла ошибка при обновлении поста", error: error.message });
     }

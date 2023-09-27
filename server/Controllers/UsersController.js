@@ -1,6 +1,7 @@
 const db = require('../models')
 const Posts = db.posts
 const Comment = db.comments
+const Likes = db.likes
 const Users = db.users
 const bcrypt = require('bcrypt')
 const {sign} = require('jsonwebtoken')
@@ -60,10 +61,59 @@ const Login = async (req, res) => {
 }
 
 
+const ChangePassword = async (req, res)=>{
+    const {oldPassword, newPassword} = req.body;
+    const user = await Users.findOne({where:{username :req.user.username},});
+
+    bcrypt.compare(oldPassword, user.password).then((match) => {
+        if (!match) {
+            return res.json({ error: "Wrong password" });
+        }
+        bcrypt.hash(newPassword, 10).then(async (hash)=>{
+            await Users.update({password:hash},{where:{username:req.user.username}})
+            res.json("Success")
+        })
+    })
+}
+
+const UserInfo = async (req, res)=>{
+    const id = req.params.id
+    try {
+        const user = await Users.findByPk(id, {
+            attributes: {exclude: ['password']},
+        })
+        if (user) {
+            const post = await Posts.findAll({
+                where: { username: user.username },
+                include: [
+                    {
+                        model: Likes,
+                        as: 'likes'
+                    },
+                    {
+                        model: Comment,
+                        as: 'comment'
+                    }
+                ],
+            });
+            res.status(200).send({user, post})
+        } else {
+            res.status(200).send("user not found")
+        }
+    }
+    catch (err){
+        console.error(err);
+        return res.json({ error: "Internal server error" });
+    }
+
+}
+
 
 
 module.exports={
     Auth,
     Login,
-    GetUser
+    GetUser,
+    UserInfo,
+    ChangePassword
 }
